@@ -1,0 +1,60 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  canonicalURL?: URL;
+  ogImage?: string;
+  type?: 'website' | 'article';
+  publishDate?: Date;
+  updatedDate?: Date;
+  tags?: string[];
+}
+
+const {
+  title,
+  description,
+  canonicalURL,
+  ogImage,
+  type = 'website',
+  publishDate,
+  updatedDate,
+  tags = [],
+} = Astro.props;
+
+const siteURL = Astro.site || 'https://your-domain.com';
+const fullURL = canonicalURL || new URL(Astro.url.pathname, siteURL);
+const ogImageURL = ogImage || new URL('/og.png', siteURL).href;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={fullURL} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={fullURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImageURL} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={fullURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageURL} />
+
+{type === 'article' && publishDate && (
+  <meta property="article:published_time" content={publishDate.toISOString()} />
+)}
+{type === 'article' && updatedDate && (
+  <meta property="article:modified_time" content={updatedDate.toISOString()} />
+)}
+{type === 'article' && tags.length > 0 && (
+  <>
+    {tags.map((tag) => (
+      <meta property="article:tag" content={tag} />
+    ))}
+  </>
+)}
+

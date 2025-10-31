@@ -1,0 +1,80 @@
+---
+title: 'Getting Started with Astro'
+description: 'A quick introduction to Astro, a modern static site generator that ships zero JavaScript by default.'
+publishDate: 2024-01-15
+tags:
+  - astro
+  - web development
+  - static sites
+cover:
+  src: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=630&fit=crop'
+  alt: 'Code on a screen'
+---
+
+Astro is a modern static site generator that's gaining popularity for its performance-first approach. Unlike traditional React frameworks, Astro ships **zero JavaScript** by default, resulting in faster page loads and better Core Web Vitals.
+
+## Why Astro?
+
+### Performance
+
+Astro's "islands architecture" allows you to selectively hydrate components that need interactivity, while keeping the rest of your site as static HTML. This means:
+
+- Faster initial page loads
+- Better SEO
+- Lower bandwidth usage
+- Improved accessibility
+
+### Developer Experience
+
+Astro provides an excellent developer experience with:
+
+- **Component Islands**: Use React, Vue, Svelte, or plain HTML/Astro components
+- **Content Collections**: Type-safe content management with Markdown and MDX
+- **Built-in Optimizations**: Image optimization, code splitting, and more
+- **Great Documentation**: Clear, comprehensive docs that make onboarding easy
+
+## Getting Started
+
+To create a new Astro project, run:
+
+```bash
+pnpm create astro@latest my-project
+```
+
+Or use npm:
+
+```bash
+npm create astro@latest my-project
+```
+
+Follow the prompts to choose your template and settings. Astro will scaffold a project with sensible defaults.
+
+## Building Your First Page
+
+Astro uses a file-based routing system. Create a file in `src/pages/` and it automatically becomes a route:
+
+```astro
+---
+// src/pages/about.astro
+---
+
+<html>
+  <head>
+    <title>About</title>
+  </head>
+  <body>
+    <h1>About Me</h1>
+  </body>
+</html>
+```
+
+## Next Steps
+
+Once you're comfortable with the basics, explore:
+
+- [Content Collections](https://docs.astro.build/en/guides/content-collections/) for managing blog posts
+- [Image Optimization](https://docs.astro.build/en/guides/images/) for better performance
+- [Deploying to Vercel](https://docs.astro.build/en/guides/deploy/vercel/) or other platforms
+
+Astro makes it easy to build fast, modern websites without sacrificing developer experience. Give it a try!
+

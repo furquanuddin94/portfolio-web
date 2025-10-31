@@ -1,0 +1,26 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-slate-600 dark:text-slate-400">
+        © {currentYear} Portfolio. Built with{' '}
+        <a href="https://astro.build" class="underline hover:text-slate-900 dark:hover:text-slate-100">
+          Astro
+        </a>
+        .
+      </p>
+      <div class="flex gap-6 text-sm text-slate-600 dark:text-slate-400">
+        <a href="/blog" class="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+          Blog
+        </a>
+        <a href="/rss.xml" class="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+          RSS
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+

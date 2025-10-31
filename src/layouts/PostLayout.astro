@@ -1,0 +1,93 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Prose from '../components/Prose.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, publishDate, updatedDate, tags, cover } = post.data;
+const siteURL = Astro.site || 'https://your-domain.com';
+const canonicalURL = new URL(`/blog/${post.slug}`, siteURL);
+const ogImage = cover?.src ? new URL(cover.src, siteURL).href : undefined;
+
+const readingTime = (content: string) => {
+  const wordsPerMinute = 200;
+  const words = content.split(/\s+/).length;
+  const minutes = Math.ceil(words / wordsPerMinute);
+  return minutes;
+};
+
+const time = readingTime(post.body);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalURL={canonicalURL}
+  ogImage={ogImage}
+  type="article"
+  publishDate={publishDate}
+  updatedDate={updatedDate}
+  tags={tags}
+>
+  <article class="min-h-screen bg-white dark:bg-slate-950">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-4xl">
+      <header class="mb-12">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-6 leading-tight">
+          {title}
+        </h1>
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-400 mb-6">
+          <time datetime={publishDate.toISOString()}>
+            {publishDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          {updatedDate && updatedDate.getTime() !== publishDate.getTime() && (
+            <>
+              <span>•</span>
+              <span>
+                Updated{' '}
+                {updatedDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
+            </>
+          )}
+          <span>•</span>
+          <span>{time} min read</span>
+        </div>
+        {tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-8">
+            {tags.map((tag) => (
+              <span class="px-3 py-1 text-sm rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        {cover && (
+          <div class="mt-8 aspect-video w-full overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 shadow-2xl">
+            <img
+              src={cover.src}
+              alt={cover.alt || title}
+              class="w-full h-full object-cover"
+              loading="eager"
+            />
+          </div>
+        )}
+      </header>
+      <Prose>
+        <slot />
+      </Prose>
+    </div>
+  </article>
+</BaseLayout>
+
+

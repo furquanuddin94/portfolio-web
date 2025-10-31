@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+:root {
+  --code-bg: 15 23 42;
+  --code-border: 30 41 59;
+}
+
+:root[class~="dark"] {
+  --code-bg: 30 41 59;
+  --code-border: 51 65 85;
+}
+
+html {
+  font-family: 'Inter Variable', system-ui, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+body {
+  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Anchor link styles */
+.anchor {
+  @apply text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 no-underline;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100 dark:bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-600;
+}
+
+/* Gradient backgrounds */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400;
+}
+
+/* Code block improvements */
+pre {
+  @apply overflow-x-auto;
+}
+
+pre code {
+  @apply bg-transparent p-0;
+}
