@@ -4,55 +4,56 @@ import PostCard from '../../components/PostCard.astro';
 import Pagination from '../../components/Pagination.astro';
 import { getCollection } from 'astro:content';
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 9;
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
-const sortedPosts = allPosts.sort(
-  (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()
-);
+const allPosts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
 
-const page = Number(Astro.url.searchParams.get('page')) || 1;
-const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
-const posts = sortedPosts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
-
-const siteURL = Astro.site || 'https://your-domain.com';
-const canonicalURL = new URL('/blog', siteURL);
+const currentPage = 1;
+const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+const paginatedPosts = allPosts.slice(0, POSTS_PER_PAGE);
 ---
 
 <BaseLayout
-  title="Blog"
-  description="Thoughts, tutorials, and updates from my journey"
-  canonicalURL={canonicalURL}
+  title="Blog - Furquan Uddin"
+  description="Building distributed systems at scale and exploring GenAI applications."
 >
-  <div class="min-h-screen bg-white dark:bg-slate-950">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-      <header class="mb-12 text-center">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-          Blog
-        </h1>
-        <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Thoughts, tutorials, and updates from my journey
-        </p>
-      </header>
+  <section class="container-custom py-12">
+    <header class="mb-12">
+      <h1 class="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-5xl">
+        Blog
+      </h1>
+      <p class="mt-4 text-xl text-zinc-600 dark:text-zinc-400">
+        Thoughts, tutorials, and stories from my journey in tech.
+      </p>
+    </header>
 
-      {posts.length > 0 ? (
-        <>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {posts.map((post) => (
-              <PostCard post={post} />
-            ))}
-          </div>
-          <Pagination currentPage={page} totalPages={totalPages} baseUrl="/blog" />
-        </>
-      ) : (
-        <div class="text-center py-16">
-          <p class="text-lg text-slate-600 dark:text-slate-400 mb-4">
-            No posts yet. Check back soon!
-          </p>
+    {paginatedPosts.length > 0 && (
+      <>
+        <div class="flex flex-col gap-4">
+          {paginatedPosts.map((post) => (
+            <PostCard
+              slug={post.slug}
+              title={post.data.title}
+              description={post.data.description}
+              publishDate={post.data.publishDate}
+              tags={post.data.tags}
+            />
+          ))}
         </div>
-      )}
-    </div>
-  </div>
-</BaseLayout>
 
+        {totalPages > 1 && (
+          <div class="mt-12">
+            <Pagination
+              currentPage={currentPage}
+              lastPage={totalPages}
+              urlPattern="/blog/[page]"
+            />
+          </div>
+        )}
+      </>
+    )}
+  </section>
+</BaseLayout>
 

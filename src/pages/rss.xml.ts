@@ -1,26 +1,25 @@
-import { getCollection } from 'astro:content';
 import rss from '@astrojs/rss';
+import { getCollection } from 'astro:content';
+import type { APIContext } from 'astro';
 
-export async function GET() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
-  const sortedPosts = posts.sort(
-    (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()
-  );
-
-  const site = import.meta.env.SITE || 'https://your-domain.com';
+export async function GET(context: APIContext) {
+  const posts = await getCollection('blog');
+  const publishedPosts = posts
+    .filter((post) => !post.data.draft)
+    .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
 
   return rss({
-    title: 'Portfolio Blog',
-    description: 'Thoughts, tutorials, and updates',
-    site,
-    items: sortedPosts.map((post) => ({
+    title: 'fukra.dev',
+    description: 'Thoughts on backend, JVM, AI systems, and building things.',
+    site: context.site ?? 'https://yoursite.com',
+    items: publishedPosts.map((post) => ({
       title: post.data.title,
       description: post.data.description,
-      link: `/blog/${post.slug}`,
       pubDate: post.data.publishDate,
+      link: `/blog/${post.slug}/`,
       categories: post.data.tags,
     })),
-    customData: '<language>en-us</language>',
+    customData: `<language>en-us</language>`,
   });
 }
 

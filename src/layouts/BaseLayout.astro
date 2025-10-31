@@ -4,53 +4,41 @@ import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
 import '../styles/global.css';
 
-interface Props {
+export interface Props {
   title: string;
   description: string;
-  canonicalURL?: URL;
-  ogImage?: string;
-  type?: 'website' | 'article';
+  image?: string;
+  article?: boolean;
   publishDate?: Date;
-  updatedDate?: Date;
   tags?: string[];
 }
 
-const {
-  title,
-  description,
-  canonicalURL,
-  ogImage,
-  type,
-  publishDate,
-  updatedDate,
-  tags,
-} = Astro.props;
+const { title, description, image, article, publishDate, tags } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <SEO
       title={title}
       description={description}
-      canonicalURL={canonicalURL}
-      ogImage={ogImage}
-      type={type}
+      image={image}
+      article={article}
       publishDate={publishDate}
-      updatedDate={updatedDate}
       tags={tags}
     />
   </head>
   <body>
-    <Header title="Portfolio" />
-    <main>
-      <slot />
-    </main>
-    <Footer />
+    <div class="flex min-h-screen flex-col">
+      <Header />
+      <main class="flex-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>
 

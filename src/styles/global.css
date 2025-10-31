@@ -1,62 +1,101 @@
-@import "tailwindcss";
-@import "@fontsource-variable/inter";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --code-bg: 15 23 42;
-  --code-border: 30 41 59;
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-white text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-100;
+  }
+
+  /* Custom selection color for personality */
+  ::selection {
+    @apply bg-primary-200 text-primary-900 dark:bg-primary-900 dark:text-primary-100;
+  }
+
+  /* Code blocks styling */
+  pre {
+    @apply overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900;
+  }
+
+  pre code {
+    @apply bg-transparent p-0;
+  }
+
+  code {
+    @apply rounded bg-zinc-100 px-1.5 py-0.5 text-sm font-medium text-primary-600 dark:bg-zinc-800 dark:text-primary-400;
+  }
+
+  /* rehype-pretty-code styling */
+  [data-rehype-pretty-code-fragment] {
+    @apply my-6;
+  }
+
+  [data-rehype-pretty-code-fragment] pre {
+    @apply overflow-x-auto;
+  }
+
+  [data-rehype-pretty-code-fragment] code {
+    @apply grid min-w-full break-words rounded-none border-0 bg-transparent p-0 text-sm text-black dark:text-white;
+    counter-reset: line;
+    box-decoration-break: clone;
+  }
+
+  [data-rehype-pretty-code-fragment] .line {
+    @apply px-4 py-1;
+  }
+
+  [data-rehype-pretty-code-fragment] [data-highlighted-line] {
+    @apply border-l-2 border-primary-500 bg-primary-50/50 dark:bg-primary-950/50;
+  }
+
+  [data-rehype-pretty-code-fragment] .line::before {
+    @apply mr-4 inline-block w-4 text-right text-zinc-500;
+    counter-increment: line;
+    content: counter(line);
+  }
 }
 
-:root[class~="dark"] {
-  --code-bg: 30 41 59;
-  --code-border: 51 65 85;
+@layer components {
+  /* Gradient text for personality */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent dark:from-primary-400 dark:to-accent-400;
+  }
+
+  /* Link styling with personality */
+  .link {
+    @apply text-primary-600 underline decoration-primary-300 decoration-2 underline-offset-2 transition-colors hover:text-primary-700 hover:decoration-primary-500 dark:text-primary-400 dark:decoration-primary-700 dark:hover:text-primary-300 dark:hover:decoration-primary-500;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600;
+  }
+
+  .btn-secondary {
+    @apply btn border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800;
+  }
 }
 
-html {
-  font-family: 'Inter Variable', system-ui, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+@layer utilities {
+  /* Container with personality - asymmetric padding for visual interest */
+  .container-custom {
+    @apply mx-auto max-w-4xl px-6 sm:px-8 lg:px-12;
+  }
 }
 
-body {
-  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Anchor link styles */
-.anchor {
-  @apply text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 no-underline;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-slate-100 dark:bg-slate-900;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-slate-600;
-}
-
-/* Gradient backgrounds */
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400;
-}
-
-/* Code block improvements */
-pre {
-  @apply overflow-x-auto;
-}
-
-pre code {
-  @apply bg-transparent p-0;
-}
