@@ -17,7 +17,7 @@ const allPosts = (await getCollection('blog'))
   <section class="container-custom py-20 sm:py-24">
     <div class="max-w-3xl space-y-6">
       <div>
-        <h1 class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-6xl">
+        <h1 class="text-5xl font-bold tracking-tight text-zinc-700 dark:text-zinc-200 sm:text-6xl">
           Hi, I'm <span class="gradient-text">Furquan</span>
         </h1>
         <p class="mt-6 text-xl leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -37,7 +37,7 @@ const allPosts = (await getCollection('blog'))
   {allPosts.length > 0 && (
     <section class="container-custom py-16">
       <div class="mb-8 flex items-center justify-between">
-        <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-100">Recent Posts</h2>
+        <h2 class="text-3xl font-bold text-zinc-700 dark:text-zinc-200">Recent Posts</h2>
         <a href="/blog" class="link text-sm font-medium">
           View all →
         </a>
