@@ -1,0 +1,197 @@
+---
+title: "Fast-tracking Integrations using Code Generation"
+description: "How we built a code generation framework at Agoda to reduce vendor integration effort by 50% using Giter8 and ScalaMeta."
+publishDate: 2022-06-30
+tags: ["scalameta", "giter8", "code-generation"]
+draft: false
+---
+
+One of the most common features developed in almost all multi-vendor e-commerce systems is vendor/supplier integration. But the drawback is that most times, each vendor's APIs (both functionally and technologically) may or may not work with the suppliers' current system design.
+
+So at Agoda, we created a composable system with clearly encapsulated modules where we can easily plug in new vendors. This platform consumes vendor APIs and normalizes them for Agoda systems using feature APIs. So, if we need to integrate a new vendor, we add that integration to our platform, make a few simple configuration changes, and that vendor is ready to be onboarded.
+
+![How Agoda connects to vendors](/images/posts/fast-tracking-integrations-using-code-generation/0_S4B-XTi3pZbaw8P4.webp)
+
+## How We Onboard New Vendors
+
+There are four steps in the vendor onboarding process: Discovery, blueprint, implement, and test. Not to mention that a single integration can be broken down into multiple feature-level integrations. Apart from the discovery step, the rest of the process can be done in parallel for each of them.
+
+![Process of integration](/images/posts/fast-tracking-integrations-using-code-generation/0_1hLHY-oPUVHyoYjB.webp)
+
+## The Problems We Faced
+
+We were integrating with various flight vendors, and one of the major problems we faced was that these flight companies are not tech companies (in the core sense); hence their tech infrastructure was not up to date.
+
+Another issue we had was language barriers. Most of these vendors are from geographically diverse locations, so performing the blueprint mapping was quite a hassle. So we began considering a better long-term solution that would either eliminate this step or, if not, at least reduce the work for us.
+
+## Implementation, can it be optimized?
+
+Now let’s talk a bit more about the Implementation part. This is what the internal architecture of the Vendor Integration platform looks like:
+
+![Modular architecture of the vendor integration platform](/images/posts/fast-tracking-integrations-using-code-generation/0_gXBKnT1M98lqTjFp.webp)
+
+From the diagram above, the whole architecture is modular, with each vendor having an independent connector module that encapsulates all the entities required to connect to the vendor.
+
+- The architecture is very similar to [Onion architecture](https://www.codeguru.com/csharp/understanding-onion-architecture/). The infrastructure and service layer is wholly decoupled from vendor modules through contracts.
+- Vendor modules are self-contained and are deployable in themselves if need be (example: one vendor has too much traffic and requires dedicated servers).
+
+![Vendor module exposes features through common interfaces](/images/posts/fast-tracking-integrations-using-code-generation/0_hueSl6G8_uiv0zNe.webp)
+
+According to Agoda Systems, each vendor has the same normalized features exposed to the infrastructure layer through interfaces. This is what a common search feature would contain:
+
+![Search feature with its components](/images/posts/fast-tracking-integrations-using-code-generation/0_LkHotrF5hrHMzLXK.webp)
+
+Since most vendors had to provide the same features, we decided to unify the architecture of vendor modules by copying common skeleton code per vendor and customizing it according to their needs.
+
+This process helped us in two ways:
+
+1. **No design brainstorming is required for new vendors:** Due to the unification of the vendor module design, new vendor modules can now plug into the existing architecture and use the same design. Because of these design unifications, new team members had no trouble integrating new suppliers.
+
+2. **The intent of templatization:** We decided to develop our architectural skeleton at the beginning of the implementation phase to save time and effort since we noticed that it is being reused and has essentially become boilerplate code for us.
+
+## Vendor templates with [Giter8](https://github.com/foundweekends/giter8)
+
+First, we created a simple template for a whole integration module that includes a boilerplate and provides blanks for vendor-specific implementations. To do this templatization, we used [Giter8](http://www.foundweekends.org/giter8/). This is how it works:
+
+![How Giter8 templating works](/images/posts/fast-tracking-integrations-using-code-generation/0_xtMp0J8VO2gxRTks.webp)
+
+Here is what a search service file template would look like:
+
+```scala
+package $package$.search
+
+private[search] class $Supplier$SearchService(
+  client: $Supplier$Client,
+  requestMapper: Mapper[SearchRequest, $Supplier$SearchRequest],
+  responseMapper: Mapper[$Supplier$SearchResponse, SearchResponse]) extends SearchService {
+
+  override def search(request: SearchRequest): Future[SearchResponse] = {
+    for {
+      //validate request
+      _ <- requestValidator.validate(request)
+      
+      //map to vendor request
+      vendorRequest <- requestMapper.map(request)
+      
+      //do the api call to vendor
+      vendorResponse <- client.search(vendorRequest)
+      
+      //map vendor response back to your model
+      response <- responseMapper.map(vendorResponse, $supplier$Response)
+    } yield response
+  }
+}
+```
+
+And once we render this file using Giter8 for a vendor whose name, for example, is `SomeRandomVendor`, it would look like this:
+
+```scala
+package com.someRandomVendor.search
+
+private[search] class SomeRandomVendorSearchService(
+  client: SomeRandomVendorClient,
+  requestMapper: Mapper[SearchRequest, SomeRandomVendorSearchRequest],
+  responseMapper: Mapper[SomeRandomVendorSearchResponse, SearchResponse]) extends SearchService {
+
+  override def search(request: SearchRequest): Future[SearchResponse] = {
+    for {
+      //validate request
+      _ <- requestValidator.validate(request)
+
+      //map to vendor request
+      vendorRequest <- requestMapper.map(request)
+
+      //do the api call to vendor
+      vendorResponse <- client.search(vendorRequest)
+
+      //map vendor response back to your model
+      response <- responseMapper.map(vendorResponse, someRandomVendorResponse)
+    } yield response
+  }
+}
+```
+
+Similarly, we will generate mappers, validators, HTTP/SOAP clients, vendor data models, etc.
+
+Entities which are vendor-independent are fully generable from the get-go while others can only be partially generated. Implementation can be completed per vendor logic. Here is a breakdown of the two kinds of entities:
+
+![Fully generable vs partially generable entities](/images/posts/fast-tracking-integrations-using-code-generation/0_lZmZK4DdgWvZlbYH.webp)
+
+## Limitations of Giter8
+
+While Giter8 was useful at the beginning, it lacked some features. It had no support for iterative generation of code. By iterative generation, we mean rendering the same template file/code snippet multiple times with different template values. Because of this limitation, we could not do the following:
+
+- **Generate vendor network clients properly:** Each vendor had a different number of APIs. For each API, there was a method in the network client to connect to it. Because we cannot vary the number of methods in the template file and cannot do iterative generation in runtime, we could not generate proper network clients.
+
+- **Generate multiple vendor calls in a single Agoda feature call:** Not all vendors are the same. We might have to follow different processes to do the same thing on two different vendors. A common use case is shown in the image below.
+
+![Variations among vendors](/images/posts/fast-tracking-integrations-using-code-generation/0_wyfbuZ9AESgpARbT.webp)
+
+For vendor 1, we do a single search call, but for vendor 2, we need to call auth before calling Search. This would require the vendor one search service to look very different from vendor two search service (with multiple client calls). Also, there’d be more mappers, validators, etc., for vendor two since it’s doing two calls to the vendor. But because the giter8 template is fixed and static, it does not support that. So, to address this, we explored a few alternative tools and finally settled for ScalaMeta!
+
+## [ScalaMeta](https://scalameta.org/), and how powerful it is!
+
+ScalaMeta, used alongside Giter8, proved very effective for generating code using a template. We broke down the generation into two parts:
+
+1. **Generate from template:** Generate a basic integration module using the Giter8 template.
+2. **Transform using ScalaMeta:** Break down the generated code into syntax trees and use custom-written transformers to mutate those syntax trees according to vendor config.
+
+These transformers perform [quasiquotes](https://scalameta.org/docs/trees/quasiquotes.html) substitution on the syntax trees as specified in the configuration. Since we encounter only a fixed set of variations among vendors (such as the number of Vendor APIs in network clients, or mapping Vendor APIs to Agoda APIs), we implemented dedicated transformers for each of these scenarios.
+
+The vendor config required for them can be found early in the **Discovery** step of our vendor integration process.
+
+![Templating with customization step](/images/posts/fast-tracking-integrations-using-code-generation/0_wrTwjbNX-NcwtXgw.webp)
+
+With ScalaMeta, we only need to supply the vendor configuration previously stated, and we can start creating all the boilerplate. So highlighting the same use case that giter8 wasn’t able to cover:
+
+- **Vendor 1 config** for a generation (calls Search directly):
+
+```yaml
+supplier_name: Vendor1
+
+# All vendor endpoints that will be generated in the network client.
+endpoints:
+  - Search
+
+# Endpoints that will be in the service, called sequentially in the given order
+mapping:
+  Search:
+    - Search
+```
+
+- **Vendor 2 config** for a generation (calls Auth before Search):
+
+```yaml
+supplier_name: Vendor2
+
+# All vendor endpoints that will be generated in the network client.
+endpoints:
+  - Auth
+  - Search
+
+# Endpoints that will be in the service, called sequentially in the given order
+mapping:
+  Search:
+    - Auth
+    - Search
+```
+
+Additionally, we can adjust changes in our service during the generation with this configuration change. After that, we need to populate vendor-specific mappings and their connection config, and our integration is ready to use! Some vendors have use cases that might need to be handled separately, but they will not be counted in the boilerplate.
+
+Moreover, ScalaMeta offers room for experimenting with and expanding the generation framework.
+
+## Some other things to note
+
+- We added a format step at the end of our generation script, so it's automatically formatted after a module is generated.
+- To ensure that no new changes are breaking our generation framework, we created a build that generates a demo vendor module and makes sure it is compilable. We made that build a part of our CI/CD pipeline, so no changes go ahead unless that build is passing.
+
+## Conclusion
+
+At the time of writing this article, with a single run of generation script (which takes around one minute), we're generating close to **100 files with around 2 KLOC** (varies with config provided). To put this into perspective, a completely done vendor integration usually has around 150 files with about 4 to 8 KLOC.
+
+Comparing the effort required to integrate two different vendors is tricky as those vendors might have poles opposite tech capabilities. Still, **the effort needed for integration decreased by around 50%** because of the code generation framework.
+
+---
+
+*Originally published on [Agoda Engineering & Design](https://medium.com/agoda-engineering/fast-tracking-integrations-using-code-generation-6e8dd441113b) on Medium.*
+

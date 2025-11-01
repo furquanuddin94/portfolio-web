@@ -24,47 +24,29 @@
     @apply bg-primary-200 text-primary-900 dark:bg-primary-900 dark:text-primary-100;
   }
 
-  /* Code blocks styling */
-  pre {
-    @apply overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900;
-  }
-
-  pre code {
-    @apply bg-transparent p-0;
-  }
-
-  code {
+  /* Inline code styling */
+  :not(pre) > code {
     @apply rounded bg-zinc-100 px-1.5 py-0.5 text-sm font-medium text-primary-600 dark:bg-zinc-800 dark:text-primary-400;
   }
 
-  /* rehype-pretty-code styling */
-  [data-rehype-pretty-code-fragment] {
-    @apply my-6;
+  /* Code block styling (scoped to prose to beat typography defaults) */
+  .prose pre.astro-code {
+    @apply my-6 overflow-x-auto rounded-lg p-5;
+    background-color: #f4f5f6 !important; /* subtle contrast in light */
+    border: 1px solid #e2e4e7 !important;
   }
 
-  [data-rehype-pretty-code-fragment] pre {
-    @apply overflow-x-auto;
+  /* Ensure inner code doesn't add extra spacing */
+  .prose pre.astro-code code { display: block; }
+
+  /* Dark mode code blocks */
+  .dark .prose pre.astro-code {
+    background-color: #171819 !important; /* subtle contrast in dark */
+    border-color: #2a2c2f !important;
   }
 
-  [data-rehype-pretty-code-fragment] code {
-    @apply grid min-w-full break-words rounded-none border-0 bg-transparent p-0 text-sm text-black dark:text-white;
-    counter-reset: line;
-    box-decoration-break: clone;
-  }
-
-  [data-rehype-pretty-code-fragment] .line {
-    @apply px-4 py-1;
-  }
-
-  [data-rehype-pretty-code-fragment] [data-highlighted-line] {
-    @apply border-l-2 border-primary-500 bg-primary-50/50 dark:bg-primary-950/50;
-  }
-
-  [data-rehype-pretty-code-fragment] .line::before {
-    @apply mr-4 inline-block w-4 text-right text-zinc-500;
-    counter-increment: line;
-    content: counter(line);
-  }
+  /* Override span colors for dark mode */
+  .dark .prose .astro-code span { color: var(--shiki-dark) !important; }
 }
 
 @layer components {
