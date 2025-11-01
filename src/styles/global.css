@@ -37,13 +37,19 @@
 
   /* Code block styling (scoped to prose to beat typography defaults) */
   .prose pre.astro-code {
-    @apply my-6 overflow-x-auto rounded-lg p-5;
+    @apply my-6 overflow-x-auto rounded-lg p-5 text-sm leading-6;
     background-color: #f4f5f6 !important; /* subtle contrast in light */
     border: 1px solid #e2e4e7 !important;
+    white-space: pre-wrap;            /* allow wrapping */
+    word-break: break-word;           /* break long tokens */
+    overflow-wrap: anywhere;          /* modern safe breaking */
   }
 
   /* Ensure inner code doesn't add extra spacing */
-  .prose pre.astro-code code { display: block; }
+  .prose pre.astro-code code {
+    display: block;
+    white-space: inherit;             /* inherit wrapping from pre */
+  }
 
   /* Dark mode code blocks */
   .dark .prose pre.astro-code {
